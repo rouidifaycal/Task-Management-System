@@ -5,9 +5,11 @@
                 <flux:heading size="xl">{{ __('Projects') }}</flux:heading>
                 <flux:text>{{ __('Projects for your current team.') }}</flux:text>
             </div>
-            <flux:button variant="primary" icon="plus" :href="route('projects.create')" wire:navigate>
-                {{ __('New project') }}
-            </flux:button>
+            @can('create', [App\Models\Project::class, auth()->user()->currentTeam])
+                <flux:button variant="primary" icon="plus" :href="route('projects.create')" wire:navigate>
+                    {{ __('New project') }}
+                </flux:button>
+            @endcan
         </header>
 
         @if (session('status'))
@@ -46,9 +48,11 @@
                 <div class="rounded-xl border border-dashed border-zinc-300 px-6 py-12 text-center dark:border-zinc-700 md:col-span-2 xl:col-span-3">
                     <flux:heading>{{ __('No projects yet') }}</flux:heading>
                     <flux:text class="mt-2">{{ __('Create a project to start organizing your team’s work.') }}</flux:text>
-                    <flux:button class="mt-5" variant="primary" :href="route('projects.create')" wire:navigate>
-                        {{ __('Create your first project') }}
-                    </flux:button>
+                    @can('create', [App\Models\Project::class, auth()->user()->currentTeam])
+                        <flux:button class="mt-5" variant="primary" :href="route('projects.create')" wire:navigate>
+                            {{ __('Create your first project') }}
+                        </flux:button>
+                    @endcan
                 </div>
             @endforelse
         </section>

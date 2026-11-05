@@ -10,17 +10,23 @@
                 <flux:badge>{{ Str::headline($project->status) }}</flux:badge>
             </div>
             <div class="flex flex-wrap gap-2">
-                <flux:button variant="primary" icon="plus" :href="route('projects.tasks.create', $project)" wire:navigate>
-                    {{ __('New task') }}
-                </flux:button>
-                <flux:button :href="route('projects.edit', $project)" wire:navigate>
-                    {{ __('Edit project') }}
-                </flux:button>
-                <form method="POST" action="{{ route('projects.destroy', $project) }}" onsubmit="return confirm('Delete this project and all its tasks?')">
-                    @csrf
-                    @method('DELETE')
-                    <flux:button variant="danger" type="submit">{{ __('Delete') }}</flux:button>
-                </form>
+                @can('create', [App\Models\Task::class, $project])
+                    <flux:button variant="primary" icon="plus" :href="route('projects.tasks.create', $project)" wire:navigate>
+                        {{ __('New task') }}
+                    </flux:button>
+                @endcan
+                @can('update', $project)
+                    <flux:button :href="route('projects.edit', $project)" wire:navigate>
+                        {{ __('Edit project') }}
+                    </flux:button>
+                @endcan
+                @can('delete', $project)
+                    <form method="POST" action="{{ route('projects.destroy', $project) }}" onsubmit="return confirm('Delete this project and all its tasks?')">
+                        @csrf
+                        @method('DELETE')
+                        <flux:button variant="danger" type="submit">{{ __('Delete') }}</flux:button>
+                    </form>
+                @endcan
             </div>
         </div>
 

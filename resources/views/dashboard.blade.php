@@ -42,9 +42,11 @@
                         <flux:text class="mx-auto mt-2 max-w-md">
                             {{ __('Create a project to organize your team’s work.') }}
                         </flux:text>
-                        <flux:button class="mt-4" variant="primary" :href="route('projects.create')" wire:navigate>
-                            {{ __('Create your first project') }}
-                        </flux:button>
+                        @can('create', [App\Models\Project::class, auth()->user()->currentTeam])
+                            <flux:button class="mt-4" variant="primary" :href="route('projects.create')" wire:navigate>
+                                {{ __('Create your first project') }}
+                            </flux:button>
+                        @endcan
                     </div>
                 @endforelse
             </div>
@@ -54,9 +56,11 @@
                 <flux:text class="mt-3">
                     {{ __('Your workspace is ready. Organize work into projects and tasks, then assign tasks to your teammates.') }}
                 </flux:text>
-                <flux:button class="mt-5" variant="primary" :href="route('projects.create')" wire:navigate>
-                    {{ __('Create a project') }}
-                </flux:button>
+                @can('create', [App\Models\Project::class, auth()->user()->currentTeam])
+                    <flux:button class="mt-5" variant="primary" :href="route('projects.create')" wire:navigate>
+                        {{ __('Create a project') }}
+                    </flux:button>
+                @endcan
             </aside>
         </section>
     </main>

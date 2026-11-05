@@ -14,14 +14,18 @@
                 </div>
             </div>
             <div class="flex gap-2">
-                <flux:button :href="route('projects.tasks.edit', [$project, $task])" wire:navigate>
-                    {{ __('Edit task') }}
-                </flux:button>
-                <form method="POST" action="{{ route('projects.tasks.destroy', [$project, $task]) }}" onsubmit="return confirm('Delete this task and its comments?')">
-                    @csrf
-                    @method('DELETE')
-                    <flux:button variant="danger" type="submit">{{ __('Delete') }}</flux:button>
-                </form>
+                @can('update', $task)
+                    <flux:button :href="route('projects.tasks.edit', [$project, $task])" wire:navigate>
+                        {{ __('Edit task') }}
+                    </flux:button>
+                @endcan
+                @can('delete', $task)
+                    <form method="POST" action="{{ route('projects.tasks.destroy', [$project, $task]) }}" onsubmit="return confirm('Delete this task and its comments?')">
+                        @csrf
+                        @method('DELETE')
+                        <flux:button variant="danger" type="submit">{{ __('Delete') }}</flux:button>
+                    </form>
+                @endcan
             </div>
         </header>
 

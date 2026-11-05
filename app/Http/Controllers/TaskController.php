@@ -8,6 +8,7 @@ use App\Models\Project;
 use App\Models\Task;
 use App\Models\Team;
 use App\Models\User;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\View\View;
 
@@ -18,6 +19,8 @@ class TaskController extends Controller
      */
     public function index(Team $currentTeam, Project $project): View
     {
+        $this->authorize('viewAny', [Task::class, $project]);
+
         return view('tasks.index', [
             'project' => $project,
             'tasks' => $project->tasks()
@@ -32,6 +35,8 @@ class TaskController extends Controller
      */
     public function create(Team $currentTeam, Project $project): View
     {
+        $this->authorize('create', [Task::class, $project]);
+
         return view('tasks.create', [
             'project' => $project,
             'task' => new Task,
@@ -60,6 +65,8 @@ class TaskController extends Controller
      */
     public function show(Team $currentTeam, Project $project, Task $task): View
     {
+        $this->authorize('view', $task);
+
         return view('tasks.show', [
             'project' => $project,
             'task' => $task->load(['assignedTo', 'creator', 'comments.user']),
@@ -71,6 +78,8 @@ class TaskController extends Controller
      */
     public function edit(Team $currentTeam, Project $project, Task $task): View
     {
+        $this->authorize('update', $task);
+
         return view('tasks.edit', [
             'project' => $project,
             'task' => $task,
@@ -96,6 +105,8 @@ class TaskController extends Controller
      */
     public function destroy(Team $currentTeam, Project $project, Task $task): RedirectResponse
     {
+        $this->authorize('delete', $task);
+
         $task->delete();
 
         return to_route('projects.tasks.index', $project)
@@ -105,9 +116,9 @@ class TaskController extends Controller
     /**
      * Get the members available for assignment in the current team.
      *
-     * @return \Illuminate\Database\Eloquent\Collection<int, User>
+     * @return Collection<int, User>
      */
-    private function teamMembers(Team $team): \Illuminate\Database\Eloquent\Collection
+    private function teamMembers(Team $team): Collection
     {
         return $team->members()->orderBy('name')->get(['users.id', 'users.name', 'users.email']);
     }

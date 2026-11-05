@@ -16,6 +16,8 @@ class ProjectController extends Controller
      */
     public function index(Team $currentTeam): View
     {
+        $this->authorize('viewAny', [Project::class, $currentTeam]);
+
         return view('projects.index', [
             'projects' => $currentTeam->projects()
                 ->with('creator')
@@ -30,6 +32,8 @@ class ProjectController extends Controller
      */
     public function create(Team $currentTeam): View
     {
+        $this->authorize('create', [Project::class, $currentTeam]);
+
         return view('projects.create', [
             'project' => new Project,
             'statuses' => Project::STATUSES,
@@ -54,6 +58,8 @@ class ProjectController extends Controller
      */
     public function show(Team $currentTeam, Project $project): View
     {
+        $this->authorize('view', $project);
+
         return view('projects.show', [
             'project' => $project
                 ->loadCount('tasks')
@@ -69,6 +75,8 @@ class ProjectController extends Controller
      */
     public function edit(Team $currentTeam, Project $project): View
     {
+        $this->authorize('update', $project);
+
         return view('projects.edit', [
             'project' => $project,
             'statuses' => Project::STATUSES,
@@ -91,6 +99,8 @@ class ProjectController extends Controller
      */
     public function destroy(Team $currentTeam, Project $project): RedirectResponse
     {
+        $this->authorize('delete', $project);
+
         $project->delete();
 
         return to_route('projects.index')

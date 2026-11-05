@@ -9,9 +9,11 @@
                 </flux:breadcrumbs>
                 <flux:heading size="xl">{{ __('Tasks') }}</flux:heading>
             </div>
-            <flux:button variant="primary" icon="plus" :href="route('projects.tasks.create', $project)" wire:navigate>
-                {{ __('New task') }}
-            </flux:button>
+            @can('create', [App\Models\Task::class, $project])
+                <flux:button variant="primary" icon="plus" :href="route('projects.tasks.create', $project)" wire:navigate>
+                    {{ __('New task') }}
+                </flux:button>
+            @endcan
         </header>
 
         @if (session('status'))
@@ -39,9 +41,11 @@
                 <div class="rounded-xl border border-dashed border-zinc-300 px-6 py-12 text-center dark:border-zinc-700">
                     <flux:heading>{{ __('No tasks yet') }}</flux:heading>
                     <flux:text class="mt-2">{{ __('Add the first task to this project.') }}</flux:text>
-                    <flux:button class="mt-5" variant="primary" :href="route('projects.tasks.create', $project)" wire:navigate>
-                        {{ __('Create a task') }}
-                    </flux:button>
+                    @can('create', [App\Models\Task::class, $project])
+                        <flux:button class="mt-5" variant="primary" :href="route('projects.tasks.create', $project)" wire:navigate>
+                            {{ __('Create a task') }}
+                        </flux:button>
+                    @endcan
                 </div>
             @endforelse
         </section>
