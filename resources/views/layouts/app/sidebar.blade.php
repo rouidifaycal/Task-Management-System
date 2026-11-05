@@ -20,6 +20,14 @@
                     <flux:sidebar.item icon="folder" :href="route('projects.index')" :current="request()->routeIs('projects.*')" wire:navigate>
                         {{ __('Projects') }}
                     </flux:sidebar.item>
+                    <flux:sidebar.item icon="bell" :href="route('notifications.index')" :current="request()->routeIs('notifications.*')" wire:navigate>
+                        <span class="flex w-full items-center justify-between gap-2">
+                            <span>{{ __('Notifications') }}</span>
+                            @if ($unreadNotificationsCount = auth()->user()->unreadNotifications()->count())
+                                <flux:badge>{{ $unreadNotificationsCount }}</flux:badge>
+                            @endif
+                        </span>
+                    </flux:sidebar.item>
                 </flux:sidebar.group>
             </flux:sidebar.nav>
 

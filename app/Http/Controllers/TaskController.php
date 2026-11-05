@@ -8,6 +8,7 @@ use App\Models\Project;
 use App\Models\Task;
 use App\Models\Team;
 use App\Models\User;
+use App\Notifications\TaskAssigned as TaskAssignedNotification;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\View\View;
@@ -56,6 +57,8 @@ class TaskController extends Controller
             'created_by' => $request->user()->getAuthIdentifier(),
         ]);
 
+        $this->notifyNewAssignee($task, $request->user());
+
         return to_route('projects.tasks.show', [$project, $task])
             ->with('status', __('Task created.'));
     }
@@ -94,7 +97,12 @@ class TaskController extends Controller
      */
     public function update(UpdateTaskRequest $request, Team $currentTeam, Project $project, Task $task): RedirectResponse
     {
+        $previousAssigneeId = $task->assigned_to === null ? null : (int) $task->assigned_to;
         $task->update($request->validated());
+
+        if ($task->wasChanged('assigned_to')) {
+            $this->notifyNewAssignee($task, $request->user(), $previousAssigneeId);
+        }
 
         return to_route('projects.tasks.show', [$project, $task])
             ->with('status', __('Task updated.'));
@@ -121,5 +129,37 @@ class TaskController extends Controller
     private function teamMembers(Team $team): Collection
     {
         return $team->members()->orderBy('name')->get(['users.id', 'users.name', 'users.email']);
+    }
+
+    private function notifyNewAssignee(Task $task, User $assignedBy, ?int $previousAssigneeId = null): void
+    {
+        $assigneeId = $task->assigned_to;
+
+        if (
+            $assigneeId === null
+            || (int) $assigneeId === (int) $assignedBy->getKey()
+            || ($previousAssigneeId !== null && (int) $assigneeId === $previousAssigneeId)
+        ) {
+            return;
+        }
+
+        $project = $task->project;
+        $team = $project->team;
+
+        abort_if($team === null, 404);
+
+        $assignee = $task->assignedTo()->firstOrFail();
+
+        $assignee->notify(new TaskAssignedNotification(
+            taskId: $task->id,
+            taskTitle: $task->title,
+            projectName: $project->name,
+            assignedByName: $assignedBy->name,
+            taskUrl: route('projects.tasks.show', [
+                'current_team' => $team,
+                'project' => $project,
+                'task' => $task,
+            ]),
+        ));
     }
 }
